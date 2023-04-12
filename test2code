@@ -1,3 +1,4 @@
+
 package com.example.feasibility_study_development_artefact
 
 import android.Manifest
@@ -95,7 +96,7 @@ class MainActivity : AppCompatActivity() {
             //save some data at the end
             Log.d("test1", "Saving data set 2")
             val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)//creates a csv file in downloads directory
-            val file = File(folder, "testData44Test1WifiOnly.csv")
+            val file = File(folder, "testData500Test1WifiOnly.csv")
             val stream = FileOutputStream(file, true)
             var newText = "\n " + totalTries.toString() + "," + wifiScans.toString()
             stream.write(newText.toByteArray())//write to the file
@@ -179,10 +180,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-     else {
-        Log.d("test1", "Not connected to Internet")
-        return false
-     }
+        else {
+            Log.d("test1", "Not connected to Internet")
+            return false
+        }
     }
 
     private fun scanWifi(): MutableList<ScanResult>? { //scan for all detectable access points
@@ -233,7 +234,7 @@ class MainActivity : AppCompatActivity() {
             networkAfterTry = false
 
             //search for a suitable hotspot
-          //  scanResults = scanWifi()
+            //  scanResults = scanWifi()
 
 /* if (scanResults != null) {//need this check because android studio cries about it
      for (result in scanResults) {//loop for each wifi discovered
@@ -329,45 +330,45 @@ class MainActivity : AppCompatActivity() {
             if (isOnline) {networkAfterTry = true}
             delay(8000L)
 
-Log.d("test1", "Saving data set 1")
-val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)//creates a csv file in downloads directory
-val file = File(folder, "testData45Test1WifiOnly.csv")
-val stream = FileOutputStream(file, true)
-var location1 = Location("error")
-location1.setLatitude(10.0)
-location1.setLongitude(1.0)
-fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            Log.d("test1", "Saving data set 1")
+            val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)//creates a csv file in downloads directory
+            val file = File(folder, "testData500Test1WifiOnly.csv")
+            val stream = FileOutputStream(file, true)
+            var location1 = Location("error")
+            location1.setLatitude(10.0)
+            location1.setLongitude(1.0)
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
 //get the last known location
-fusedLocationClient.lastLocation
-    .addOnSuccessListener { location : Location? ->
-        if (location == null) {
-            Toast.makeText(this, "Cannot get location", Toast.LENGTH_SHORT).show()
-        }
-        else {location1 = location}
-    }
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location : Location? ->
+                    if (location == null) {
+                        Toast.makeText(this, "Cannot get location", Toast.LENGTH_SHORT).show()
+                    }
+                    else {location1 = location}
+                }
 
 //try to get current location, this may not work or be very late so use the above last know location instead while this intent works in the background
-fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
-    override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
-    override fun isCancellationRequested() = false
-})
-    .addOnSuccessListener { location: Location? ->
-        if (location == null)
-            Toast.makeText(this, "Cannot get location", Toast.LENGTH_SHORT).show()
-        else {
-            location1 = location
-        }
-    }
-delay(2000L) //give the location client some time
+            fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
+                override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
+                override fun isCancellationRequested() = false
+            })
+                .addOnSuccessListener { location: Location? ->
+                    if (location == null)
+                        Toast.makeText(this, "Cannot get location", Toast.LENGTH_SHORT).show()
+                    else {
+                        location1 = location
+                    }
+                }
+            delay(2000L) //give the location client some time
 
 //get current battery level using battery manager and a sticky intent
-val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-val batteryStatus = registerReceiver(null, ifilter)
-val level = batteryStatus!!.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-val scale = batteryStatus!!.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-val batteryPct = level / scale.toFloat()
-val batteryPctStr = (batteryPct * 100).toString()
+            val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+            val batteryStatus = registerReceiver(null, ifilter)
+            val level = batteryStatus!!.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+            val scale = batteryStatus!!.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+            val batteryPct = level / scale.toFloat()
+            val batteryPctStr = (batteryPct * 100).toString()
 
 /*
 var wifiscanCommasRemoved = ""
@@ -378,66 +379,66 @@ scanResults?.forEach { //remove commas because they break the formatting in csv 
 
  */
 
-var current = LocalDateTime.now()
-var newText = "\n " + current + "," + "\"" + location1.toString() + "\"" + "," + whatconnectivity  + "," + networkAfterTry.toString()+ "," + mobileDataInfo.toString()
-stream.write(newText.toByteArray())//write to the file
+            var current = LocalDateTime.now()
+            var newText = "\n " + current + "," + "\"" + location1.toString() + "\"" + "," + whatconnectivity  + "," + networkAfterTry.toString()+ "," + batteryPctStr + "," + mobileDataInfo.toString()
+            stream.write(newText.toByteArray())//write to the file
 // Close the stream
-stream.close()
+            stream.close()
 
-        while (TimeNow < TimeFuture) {
-            Log.d("test1", "Waiting for 10 seconds to pass")
-            TimeNow = System.currentTimeMillis()
-            delay(1000L)
+            while (TimeNow < TimeFuture) {
+                Log.d("test1", "Waiting for 10 seconds to pass")
+                TimeNow = System.currentTimeMillis()
+                delay(1000L)
+            }
         }
     }
-}
 
-fun whatConnectivity(context: Context): String {
-val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-if (connectivityManager != null) {
-val capabilities =
-    connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-if (capabilities != null) {
-    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-        Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        when (telephonyManager.dataNetworkType) {
-            NETWORK_TYPE_LTE -> return "4G"
-            NETWORK_TYPE_NR -> return "5G"
-            NETWORK_TYPE_UNKNOWN -> return "Unknown"
-            else -> return "3G or lower"
+    fun whatConnectivity(context: Context): String {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (connectivityManager != null) {
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                    when (telephonyManager.dataNetworkType) {
+                        NETWORK_TYPE_LTE -> return "4G"
+                        NETWORK_TYPE_NR -> return "5G"
+                        NETWORK_TYPE_UNKNOWN -> return "Unknown"
+                        else -> return "3G or lower"
+                    }
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return "WIFI"
+                }
+            }
         }
-    } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-        Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-        return "WIFI"
+        return "No Connection"
     }
-}
-}
-return "No Connection"
-}
 
-private fun checkPermissions(){//checks permissions
-val checkPermission1 = checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-val checkPermission2 = checkSelfPermission(Manifest.permission.INTERNET) //the internet permission technically does not need to be checked here but I still do it to be safe.
-val checkPermission3 = checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE)
-val checkPermission4 = checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE)
-val checkPermission5 = checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-val checkPermission6 = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-val checkPermission7 = checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
-val needToAsk =
-!((checkPermission1 == PackageManager.PERMISSION_GRANTED) and (checkPermission2 == PackageManager.PERMISSION_GRANTED) and (checkPermission3 == PackageManager.PERMISSION_GRANTED) and (checkPermission4 == PackageManager.PERMISSION_GRANTED)and (checkPermission5 == PackageManager.PERMISSION_GRANTED)and (checkPermission6 == PackageManager.PERMISSION_GRANTED)and (checkPermission7 == PackageManager.PERMISSION_GRANTED))
-if (needToAsk) {
-requestPermissions(
-    arrayOf(
-        Manifest.permission.ACCESS_NETWORK_STATE,
-        Manifest.permission.INTERNET,
-        Manifest.permission.ACCESS_WIFI_STATE,
-        Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.READ_PHONE_STATE
-    ), 0
-)
-}
-}
+    private fun checkPermissions(){//checks permissions
+        val checkPermission1 = checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+        val checkPermission2 = checkSelfPermission(Manifest.permission.INTERNET) //the internet permission technically does not need to be checked here but I still do it to be safe.
+        val checkPermission3 = checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE)
+        val checkPermission4 = checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE)
+        val checkPermission5 = checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+        val checkPermission6 = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        val checkPermission7 = checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
+        val needToAsk =
+            !((checkPermission1 == PackageManager.PERMISSION_GRANTED) and (checkPermission2 == PackageManager.PERMISSION_GRANTED) and (checkPermission3 == PackageManager.PERMISSION_GRANTED) and (checkPermission4 == PackageManager.PERMISSION_GRANTED)and (checkPermission5 == PackageManager.PERMISSION_GRANTED)and (checkPermission6 == PackageManager.PERMISSION_GRANTED)and (checkPermission7 == PackageManager.PERMISSION_GRANTED))
+        if (needToAsk) {
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACCESS_NETWORK_STATE,
+                    Manifest.permission.INTERNET,
+                    Manifest.permission.ACCESS_WIFI_STATE,
+                    Manifest.permission.CHANGE_WIFI_STATE,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE
+                ), 0
+            )
+        }
+    }
 }
