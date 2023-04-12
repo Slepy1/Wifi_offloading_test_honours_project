@@ -397,7 +397,7 @@ scanResults?.forEach { //remove commas because they break the formatting in csv 
  */
 
             var current = LocalDateTime.now()
-            var newText = "\n " + current + "," + "\"" + location1.toString() + "\"" + "," + whatconnectivity  + "," + networkAfterTry.toString()+ "," + mobileDataInfo.toString()
+            var newText = "\n " + current + "," + "\"" + location1.toString() + "\"" + "," + whatconnectivity  + "," + networkAfterTry.toString() + "," + batteryPctStr + "," + mobileDataInfo.toString()
             stream.write(newText.toByteArray())//write to the file
 // Close the stream
             stream.close()
