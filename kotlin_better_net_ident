@@ -1,4 +1,3 @@
-
 package com.example.feasibility_study_development_artefact
 
 import android.Manifest
@@ -11,7 +10,6 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.media.metrics.NetworkEvent.NETWORK_TYPE_UNKNOWN
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
@@ -95,7 +93,7 @@ class MainActivity : AppCompatActivity() {
             //save some data at the end
             Log.d("test1", "Saving data set 2")
             val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)//creates a csv file in downloads directory
-            val file = File(folder, "testData33Test1WifiOnly.csv")
+            val file = File(folder, "testData77Test1WifiOnly.csv")
             val stream = FileOutputStream(file, true)
             var newText = "\n " + totalTries.toString() + "," + wifiScans.toString()
             stream.write(newText.toByteArray())//write to the file
@@ -158,7 +156,6 @@ class MainActivity : AppCompatActivity() {
     }
     /////////////////////////////////no moreamplify datastore functions
 
-
     fun isDeviceOnline(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkCapabilities = connectivityManager.activeNetwork
@@ -203,7 +200,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun main_coroutine() {//run this function as a coroutine so that delay can be used
-        var wifiManager = this.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiManager = this.getSystemService(Context.WIFI_SERVICE) as WifiManager
         var TimeNow = System.currentTimeMillis()
         var TimeFuture = TimeNow
         var ssids: Queue<String> = LinkedList<String>()
@@ -218,7 +215,12 @@ class MainActivity : AppCompatActivity() {
         var whatconnectivity  = whatConnectivity(this)
 
         while (!stopClicked){//keep looping until stop button is clicked
-            TimeNow = System.currentTimeMillis()
+
+
+            try{
+
+
+                TimeNow = System.currentTimeMillis()
             TimeFuture = TimeNow + 10000//this function is limited to loop max once every 10 seconds
             ssids.clear()
             suggestionsList.clear()
@@ -256,8 +258,7 @@ class MainActivity : AppCompatActivity() {
                     run breaking@ {//the run breaking is used to stop for each when return breaking is used
                         ssids?.forEach {
                                 x ->
-                            //if (recentlyTried.size == 0){//when recently tried list is empty aka the first scan
-                            if (true){
+                            if (recentlyTried.size == 0){//when recently tried list is empty aka the first scan
                                 recentlyTried.add(x)
                                 Log.d("test1", "connecting to " + x.toString())//the hotspots ssid is added to the recently tried list and app tries to connect to it
                                 val suggestWifi = WifiNetworkSuggestion.Builder()
@@ -293,17 +294,21 @@ class MainActivity : AppCompatActivity() {
                 } else {Log.d("test1", "All hotspots are password protected")}
             } else {Log.d("test1", "no hotspots detected")}
 
-            Log.d("test1", "sram")
+                whatconnectivity  = whatConnectivity(this)
             if (suggestionsList.size > 0){//if a wifi ssid was found and suggested
                 Log.d("test1", "waiting")
-                delay(16000L)//wait 8 seconds to allow wifi login application to work, why 8 ? from my manual experiments it takes around 6 seconds for that app to log in
+                delay(8000L)//wait 8 seconds to allow wifi login application to work, why 8 ? from my manual experiments it takes around 6 seconds for that app to log in
                 Log.d("test1", "stop waiting")
                 //isOnline = false
                 isOnline = isDeviceOnline(this) //cheks if device can connect to the internet, checks if the captive portal login app worked
                 Log.d("test1", "Success there is internet access")
                 if (isOnline) {networkTimeNetOk = LocalDateTime.now()}
-                whatconnectivity  = whatConnectivity(this)
-
+                while (isOnline && (whatconnectivity == "WIFI")){//loop until there is no longer internet access
+                    networkAfterTry = true
+                    delay(1000L)//check every second for internet access
+                    isOnline = isDeviceOnline(this)
+                    whatconnectivity  = whatConnectivity(this)
+                }
                 Log.d("test1", "Internet access died")
                 var networkTimeEnd = LocalDateTime.now()
             }
@@ -312,7 +317,7 @@ class MainActivity : AppCompatActivity() {
 
             Log.d("test1", "Saving data set 1")
             val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)//creates a csv file in downloads directory
-            val file = File(folder, "testData801Test1WifiOnly.csv")
+            val file = File(folder, "testData78Test1WifiOnly.csv")
             val stream = FileOutputStream(file, true)
             var location1 = Location("error")
             location1.setLatitude(10.0)
@@ -342,6 +347,9 @@ class MainActivity : AppCompatActivity() {
                 }
             delay(2000L) //give the location client some time
 
+            val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            val mobileDataInfo =  telephonyManager.allCellInfo
+
             //get current battery level using battery manager and a sticky intent
             val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
             val batteryStatus = registerReceiver(null, ifilter)
@@ -357,7 +365,7 @@ class MainActivity : AppCompatActivity() {
                 wifiscanCommasRemoved = wifiscanCommasRemoved + temp + ", ," }
 
             var current = LocalDateTime.now()
-            var newText = "\n " + current + "," + "\"" + location1.toString() + "\"" + "," + whatconnectivity  + "," + isOnline.toString() + ","  + batteryPctStr + "," + usedSSID.toString() + "," + networkTimeStart.toString() +  "," + networkTimeNetOk.toString() + "," + networkTimeEnd.toString() + "," + wifiscanCommasRemoved
+            var newText = "\n " + current + "," + "\"" + location1.toString() + "\"" + "," + whatconnectivity  + "," + networkAfterTry.toString() + ","  + batteryPctStr + "," + usedSSID.toString() + "," + networkTimeStart.toString() +  "," + networkTimeNetOk.toString() + "," + networkTimeEnd.toString() + "," + wifiscanCommasRemoved + "," + "\"" + "," + mobileDataInfo + "\""
             stream.write(newText.toByteArray())//write to the file
             // Close the stream
             stream.close()
@@ -367,7 +375,11 @@ class MainActivity : AppCompatActivity() {
                 TimeNow = System.currentTimeMillis()
                 delay(1000L)
             }
+
+            }catch(e: ArithmeticException){
+            }
         }
+
     }
 
     fun whatConnectivity(context: Context): String {
