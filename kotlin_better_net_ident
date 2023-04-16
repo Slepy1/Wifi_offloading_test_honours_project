@@ -54,6 +54,7 @@ var usedSSID = "abc"
 var wifiScans = 0
 var totalTries = 0
 var networkAfterTry = false
+var wasonline = false
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,12 +160,16 @@ class MainActivity : AppCompatActivity() {
     fun isDeviceOnline(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkCapabilities = connectivityManager.activeNetwork
+        Log.d("test1", networkCapabilities.toString())
         if (networkCapabilities != null) {
             val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities)
+            Log.d("test1", actNw.toString())
             if (actNw != null) {
                 if (actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    Log.d("test1", "123")
                     return true
                 } else if (actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    Log.d("test1", "234")
                     return true
                 } else if (actNw.hasTransport(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
                     return true
@@ -195,6 +200,7 @@ class MainActivity : AppCompatActivity() {
         while (!stopClicked) {
             var TimeNow = System.currentTimeMillis()
             amplifyCreate(TimeNow.toString(), "noTempCauseAndroidBad")
+            Log.d("test1", "oga")
             delay(10000L)
         }
     }
@@ -213,18 +219,20 @@ class MainActivity : AppCompatActivity() {
         var networkTimeEnd = LocalDateTime.of(2020, 1, 1, 1, 1, 1)
         var isOnline = false
         var whatconnectivity  = whatConnectivity(this)
+        var whatwasconnectivity = whatConnectivity(this)
 
-        while (!stopClicked){//keep looping until stop button is clicked
+            while (!stopClicked){//keep looping until stop button is clicked
 
 
             try{
 
 
                 TimeNow = System.currentTimeMillis()
-            TimeFuture = TimeNow + 10000//this function is limited to loop max once every 10 seconds
-            ssids.clear()
-            suggestionsList.clear()
-            networkAfterTry = false
+                TimeFuture = TimeNow + 10000//this function is limited to loop max once every 10 seconds
+                ssids.clear()
+                suggestionsList.clear()
+                networkAfterTry = false
+                wasonline = false
 
             //search for a suitable hotspot
             scanResults = scanWifi()
@@ -279,12 +287,16 @@ class MainActivity : AppCompatActivity() {
                                             recentlyTried.remove()
                                         }
                                         Log.d("test1", "connecting to " + x.toString())
-                                        val suggestWifi = WifiNetworkSuggestion.Builder()
-                                            .setSsid(x)
-                                            .build()
-                                        usedSSID = x.toString()
-                                        suggestionsList.add(suggestWifi)
-                                        wifiManager.addNetworkSuggestions(suggestionsList)//try to connect to a wifi
+                                        try {
+                                            val suggestWifi = WifiNetworkSuggestion.Builder()
+                                                .setSsid(x)
+                                                .build()
+                                            usedSSID = x.toString()
+                                            suggestionsList.add(suggestWifi)
+                                            wifiManager.addNetworkSuggestions(suggestionsList)//try to connect to a wifi
+
+                                    }catch(e: ArithmeticException){
+                                    }
                                         return@breaking
                                     }
                                 }
@@ -295,14 +307,19 @@ class MainActivity : AppCompatActivity() {
             } else {Log.d("test1", "no hotspots detected")}
 
                 whatconnectivity  = whatConnectivity(this)
-            if (suggestionsList.size > 0){//if a wifi ssid was found and suggested
+                whatwasconnectivity = whatconnectivity
+           // if (suggestionsList.size > 0){//if a wifi ssid was found and suggested
                 Log.d("test1", "waiting")
                 delay(8000L)//wait 8 seconds to allow wifi login application to work, why 8 ? from my manual experiments it takes around 6 seconds for that app to log in
                 Log.d("test1", "stop waiting")
                 //isOnline = false
-                isOnline = isDeviceOnline(this) //cheks if device can connect to the internet, checks if the captive portal login app worked
-                Log.d("test1", "Success there is internet access")
-                if (isOnline) {networkTimeNetOk = LocalDateTime.now()}
+                isOnline = isDeviceOnline(this) //checks if device can connect to the internet, checks if the captive portal login app worked
+                Log.d("test1", isOnline.toString())
+                if (isOnline) {
+                    Log.d("test1", "Success there is internet access")
+                    networkTimeNetOk = LocalDateTime.now()
+                    wasonline = true
+                }
                 while (isOnline && (whatconnectivity == "WIFI")){//loop until there is no longer internet access
                     networkAfterTry = true
                     delay(1000L)//check every second for internet access
@@ -311,13 +328,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 Log.d("test1", "Internet access died")
                 var networkTimeEnd = LocalDateTime.now()
-            }
+           // }
             //in android when wifi and mobile data is available then it usually uses wifi
             //so having mobile data active all the time works fine, no need to disable and enable it here
 
             Log.d("test1", "Saving data set 1")
             val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)//creates a csv file in downloads directory
-            val file = File(folder, "testData78Test1WifiOnly.csv")
+            val file = File(folder, "testData900Test1WifiOnly.csv")
             val stream = FileOutputStream(file, true)
             var location1 = Location("error")
             location1.setLatitude(10.0)
@@ -365,7 +382,7 @@ class MainActivity : AppCompatActivity() {
                 wifiscanCommasRemoved = wifiscanCommasRemoved + temp + ", ," }
 
             var current = LocalDateTime.now()
-            var newText = "\n " + current + "," + "\"" + location1.toString() + "\"" + "," + whatconnectivity  + "," + networkAfterTry.toString() + ","  + batteryPctStr + "," + usedSSID.toString() + "," + networkTimeStart.toString() +  "," + networkTimeNetOk.toString() + "," + networkTimeEnd.toString() + "," + wifiscanCommasRemoved + "," + "\"" + "," + mobileDataInfo + "\""
+            var newText = "\n " + current + "," + "\"" + location1.toString() + "\"" + "," + whatwasconnectivity  + "," + wasonline.toString() + ","  + batteryPctStr + "," + usedSSID.toString() + "," + networkTimeStart.toString() +  "," + networkTimeNetOk.toString() + "," + networkTimeEnd.toString() + "," + wifiscanCommasRemoved + "," + "\"" + "," + mobileDataInfo + "\""
             stream.write(newText.toByteArray())//write to the file
             // Close the stream
             stream.close()
@@ -388,9 +405,9 @@ class MainActivity : AppCompatActivity() {
         val capabilities = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return "No Connection"
 
         return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "WIFI and mobile"
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "WIFI and 4G"
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "4G"
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "WIFI"
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "Mobile Data"
             else -> "Unknown"
         }
     }
